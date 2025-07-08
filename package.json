@@ -1,0 +1,27 @@
+{
+  "name": "workspace",
+  "version": "1.0.0",
+  "description": "Zonalyze é uma aplicação web completa para análise de sentimentos de comentários usando inteligência artificial. O sistema utiliza embeddings BERT e regressão logística para classificar sentimentos em português.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@angular-devkit/build-angular": "^19.2.15",
+    "@angular/cli": "^19.2.15",
+    "@angular/common": "^19.2.14",
+    "@angular/core": "^19.2.14",
+    "@angular/forms": "^19.2.14",
+    "@angular/platform-browser": "^19.2.14",
+    "@angular/platform-browser-dynamic": "^19.2.14",
+    "@angular/router": "^19.2.14",
+    "bootstrap": "^5.3.7",
+    "chart.js": "^4.5.0",
+    "rxjs": "^7.8.2",
+    "typescript": "^5.8.3",
+    "zone.js": "^0.15.1"
+  }
+}

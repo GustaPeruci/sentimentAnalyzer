@@ -1,0 +1,82 @@
+<div class="main-container">
+  <div class="content-wrapper">
+    <!-- Logo and Title -->
+    <div class="header-section">
+      <div class="logo-container">
+        <!-- Pie Chart Logo (SVG) -->
+        <svg width="80" height="80" viewBox="0 0 80 80" class="logo-chart">
+          <g transform="translate(40,40)">
+            <!-- Tristeza (Purple) - 45.5% -->
+            <path d="M 0,0 L 0,-30 A 30,30 0 0,1 21.21,-21.21 Z" fill="#8E44AD"></path>
+            <!-- Alegria (Yellow) - 18.2% -->
+            <path d="M 0,0 L 21.21,-21.21 A 30,30 0 0,1 30,0 Z" fill="#F1C40F"></path>
+            <!-- Raiva (Red) - 9.1% -->
+            <path d="M 0,0 L 30,0 A 30,30 0 0,1 21.21,21.21 Z" fill="#E74C3C"></path>
+            <!-- Surpresa (Green) - 27.3% -->
+            <path d="M 0,0 L 21.21,21.21 A 30,30 0 0,1 0,-30 Z" fill="#2ECC71"></path>
+          </g>
+        </svg>
+        <h1 class="brand-title">Zonalyze</h1>
+      </div>
+    </div>
+
+    <!-- Input Section -->
+    <div class="input-section">
+      <div class="input-container">
+        <textarea 
+          [(ngModel)]="commentText"
+          (keypress)="onKeyPress($event)"
+          class="comment-input"
+          placeholder="Coloque seu comentário aqui..."
+          rows="4"
+          [disabled]="isAnalyzing">
+        </textarea>
+        
+        <button 
+          (click)="onAnalyze()"
+          class="analyze-button"
+          [disabled]="isAnalyzing || !commentText.trim()">
+          <span *ngIf="!isAnalyzing">Analisar</span>
+          <span *ngIf="isAnalyzing" class="loading-spinner">
+            <i class="spinner"></i> Analisando...
+          </span>
+        </button>
+      </div>
+
+      <!-- Error Message -->
+      <div *ngIf="errorMessage" class="error-message">
+        <i class="fas fa-exclamation-triangle"></i>
+        {{ errorMessage }}
+      </div>
+
+      <!-- Quick Result Display -->
+      <div *ngIf="analysisResult && !analysisResult.error" class="quick-result">
+        <div class="result-card">
+          <h3>Resultado da Análise:</h3>
+          <div class="sentiment-display">
+            <div class="sentiment-label" 
+                 [style.background-color]="getSentimentColor(analysisResult.sentiment)">
+              {{ analysisResult.sentiment }}
+            </div>
+            <div class="confidence-score">
+              Confiança: {{ formatConfidence(analysisResult.confidence) }}%
+            </div>
+          </div>
+          <p class="analyzed-text">"{{ analysisResult.text }}"</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation Section -->
+    <div class="navigation-section">
+      <button (click)="navigateToResults()" class="nav-button secondary">
+        <i class="fas fa-list"></i>
+        Ver Resultados
+      </button>
+      <button (click)="navigateToAnalytics()" class="nav-button secondary">
+        <i class="fas fa-chart-pie"></i>
+        Análise Gráfica
+      </button>
+    </div>
+  </div>
+</div>

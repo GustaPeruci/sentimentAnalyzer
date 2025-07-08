@@ -1,0 +1,145 @@
+<div class="analytics-container">
+  <div class="header">
+    <button (click)="navigateToHome()" class="back-button">
+      <i class="fas fa-arrow-left"></i>
+      Voltar
+    </button>
+    <h1 class="page-title">Análise gráfica:</h1>
+    <div class="header-actions">
+      <button (click)="refreshAnalytics()" class="action-button" [disabled]="isLoading">
+        <i class="fas fa-sync-alt" [class.spinning]="isLoading"></i>
+        Atualizar
+      </button>
+    </div>
+  </div>
+
+  <div class="content-wrapper">
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="loading-state">
+      <div class="spinner-large"></div>
+      <p>Carregando dados analíticos...</p>
+    </div>
+
+    <!-- Error State -->
+    <div *ngIf="errorMessage && !isLoading" class="error-state">
+      <i class="fas fa-exclamation-triangle"></i>
+      <p>{{ errorMessage }}</p>
+      <button (click)="loadAnalytics()" class="retry-button">Tentar Novamente</button>
+    </div>
+
+    <!-- Analytics Content -->
+    <div *ngIf="!isLoading && !errorMessage" class="analytics-content">
+      
+      <!-- Summary Statistics -->
+      <div class="stats-summary">
+        <div class="stat-card">
+          <div class="stat-icon">
+            <i class="fas fa-chart-line"></i>
+          </div>
+          <div class="stat-info">
+            <h3>{{ totalAnalyses }}</h3>
+            <p>Total de Análises</p>
+          </div>
+        </div>
+        
+        <div class="stat-card" *ngFor="let data of analyticsData">
+          <div class="stat-icon" [style.color]="data.color">
+            <i [class]="getSentimentIcon(data.sentiment)"></i>
+          </div>
+          <div class="stat-info">
+            <h3>{{ data.count }}</h3>
+            <p>{{ data.sentiment }}</p>
+            <span class="percentage">{{ data.percentage.toFixed(1) }}%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts Section -->
+      <div class="charts-section">
+        
+        <!-- Donut Chart -->
+        <div class="chart-container donut-container">
+          <div class="chart-header">
+            <h2>Distribuição de Sentimentos</h2>
+            <p>Análise proporcional dos sentimentos detectados</p>
+          </div>
+          <div class="chart-wrapper">
+            <canvas id="donutChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Bar Chart -->
+        <div class="chart-container bar-container">
+          <div class="chart-header">
+            <h2>Quantidade por Sentimento</h2>
+            <p>Contagem absoluta de cada categoria de sentimento</p>
+          </div>
+          <div class="chart-wrapper">
+            <canvas id="barChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Detailed Analytics Table -->
+      <div class="analytics-table">
+        <h2>Detalhamento dos Dados</h2>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Sentimento</th>
+                <th>Quantidade</th>
+                <th>Percentual</th>
+                <th>Distribuição</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let data of analyticsData">
+                <td>
+                  <div class="sentiment-cell">
+                    <i [class]="getSentimentIcon(data.sentiment)" [style.color]="data.color"></i>
+                    {{ data.sentiment }}
+                  </div>
+                </td>
+                <td class="count-cell">{{ data.count }}</td>
+                <td class="percentage-cell">{{ data.percentage.toFixed(1) }}%</td>
+                <td class="bar-cell">
+                  <div class="progress-bar">
+                    <div 
+                      class="progress-fill" 
+                      [style.background-color]="data.color"
+                      [style.width.%]="data.percentage">
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div *ngIf="analyticsData.length === 0" class="empty-state">
+        <i class="fas fa-chart-pie"></i>
+        <h3>Nenhum dado analítico disponível</h3>
+        <p>Analise alguns comentários para ver as estatísticas aqui.</p>
+        <button (click)="navigateToHome()" class="primary-button">
+          <i class="fas fa-plus"></i>
+          Analisar Comentário
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation Footer -->
+  <div class="footer-nav">
+    <button (click)="navigateToHome()" class="nav-footer-button">
+      <i class="fas fa-home"></i>
+      Início
+    </button>
+    <button (click)="navigateToResults()" class="nav-footer-button">
+      <i class="fas fa-list"></i>
+      Resultados
+    </button>
+  </div>
+</div>

@@ -1,0 +1,561 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <title>Zonalyze - Análise de Sentimentos</title>
+  <base href="/">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Zonalyze - Análise de sentimentos de comentários usando inteligência artificial">
+  <meta name="keywords" content="sentiment analysis, análise de sentimentos, AI, inteligência artificial">
+  <link rel="icon" type="image/x-icon" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTYsMTYpIj4KPEA+YXRoIGQ9Ik0gMCwwIEwgMCwtMTIgQSAxMiwxMiAwIDAsMSA4LjQ4LC04LjQ4IFoiIGZpbGw9IiM4RTQ0QUQiPjwvcGF0aD4KPHA+YXRoIGQ9Ik0gMCwwIEwgOC40OCwtOC40OCBBIDI4LDEyIDAgMCwxIDEyLDAgWiIgZmlsbD0iI0YxQzQwRiI+PC9wYXRoPgo8cGF0aCBkPSJNIDAsMCBMIDEyLDAgQSAxMiwxMiAwIDAsMSA4LjQ4LDguNDggWiIgZmlsbD0iI0U3NEMzQyI+PC9wYXRoPgo8cGF0aCBkPSJNIDAsMCBMIDguNDgsOC40OCBBIDI4LDEyIDAgMCwxIDAsLTEyIFoiIGZpbGw9IiMyRUNDNzEiPjwvcGF0aD4KPC9nPgo8L3N2Zz4K">
+  
+  <!-- Font Awesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  
+  <!-- Bootstrap CSS for styling -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  
+  <!-- Chart.js for visualizations -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 60px 20px;
+    }
+
+    .main-container {
+      max-width: 600px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .logo-section {
+      margin-bottom: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
+    }
+
+    .logo-chart {
+      width: 60px;
+      height: 60px;
+      position: relative;
+    }
+
+    .pie-chart {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: conic-gradient(
+        #8B5CF6 0deg 164deg,    /* Tristeza - roxo */
+        #FCD34D 164deg 229deg,  /* Alegria - amarelo */
+        #EF4444 229deg 262deg,  /* Raiva - vermelho */
+        #10B981 262deg 360deg   /* Surpresa - verde */
+      );
+    }
+
+    .logo-text {
+      font-size: 48px;
+      font-weight: 300;
+      color: #000000;
+      letter-spacing: -1px;
+    }
+
+    .input-section {
+      margin-bottom: 40px;
+    }
+
+    .comment-input {
+      width: 100%;
+      max-width: 500px;
+      padding: 16px 20px;
+      border: 2px solid #e5e7eb;
+      border-radius: 50px;
+      font-size: 16px;
+      background: #ffffff;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .comment-input:focus {
+      border-color: #3b82f6;
+    }
+
+    .comment-input::placeholder {
+      color: #9ca3af;
+    }
+
+    .analyze-btn {
+      background: #3b82f6;
+      color: white;
+      border: none;
+      border-radius: 50px;
+      padding: 12px 32px;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      margin-top: 20px;
+      transition: background-color 0.2s;
+    }
+
+    .analyze-btn:hover {
+      background: #2563eb;
+    }
+
+    .analyze-btn:disabled {
+      background: #9ca3af;
+      cursor: not-allowed;
+    }
+
+    .results-section {
+      margin-top: 60px;
+      display: block;
+    }
+
+    .results-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #000000;
+      margin-bottom: 30px;
+      text-align: left;
+    }
+
+    .results-container {
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 24px;
+      background: #ffffff;
+    }
+
+    .result-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid #f3f4f6;
+    }
+
+    .result-item:last-child {
+      border-bottom: none;
+    }
+
+    .result-text {
+      font-size: 14px;
+      color: #374151;
+      text-align: left;
+      flex-grow: 1;
+      max-width: 60%;
+    }
+
+    .sentiment-pill {
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+      color: white;
+      min-width: 80px;
+      text-align: center;
+    }
+
+    .sentiment-tristeza { background-color: #8B5CF6; }
+    .sentiment-alegria { background-color: #FCD34D; color: #000; }
+    .sentiment-raiva { background-color: #EF4444; }
+    .sentiment-surpresa { background-color: #10B981; }
+
+    .analytics-section {
+      margin-top: 60px;
+      display: none;
+    }
+
+    .analytics-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #000000;
+      margin-bottom: 30px;
+      text-align: left;
+    }
+
+    .analytics-container {
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 32px;
+      background: #ffffff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 400px;
+    }
+
+    .chart-container {
+      position: relative;
+      width: 300px;
+      height: 300px;
+    }
+
+    .nav-section {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      display: flex;
+      gap: 10px;
+    }
+
+    .nav-btn {
+      background: #f3f4f6;
+      border: none;
+      border-radius: 20px;
+      padding: 8px 16px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .nav-btn.active {
+      background: #3b82f6;
+      color: white;
+    }
+
+    .nav-btn:hover {
+      background: #e5e7eb;
+    }
+
+    .nav-btn.active:hover {
+      background: #2563eb;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .loading {
+      opacity: 0.7;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <div class="nav-section">
+    <button class="nav-btn active" onclick="showPage('main')" id="nav-main">Principal</button>
+    <button class="nav-btn" onclick="showPage('results')" id="nav-results">Resultados</button>
+    <button class="nav-btn" onclick="showPage('analytics')" id="nav-analytics">Analytics</button>
+  </div>
+
+  <!-- Main Container -->
+  <div class="main-container">
+    <!-- Main Page -->
+    <div id="main-page">
+      <div class="logo-section">
+        <div class="logo-chart">
+          <div class="pie-chart"></div>
+        </div>
+        <div class="logo-text">Zonalyze</div>
+      </div>
+
+      <div class="input-section">
+        <input 
+          type="text" 
+          id="commentText" 
+          class="comment-input" 
+          placeholder="Coloque seu comentário aqui..."
+        />
+        <br>
+        <button class="analyze-btn" onclick="analyzeSentiment()" id="analyzeBtn">
+          <span id="btn-text">Analisar</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Results Page -->
+    <div id="results-page" class="hidden">
+      <div class="results-section">
+        <h2 class="results-title">Resultado:</h2>
+        <div class="results-container" id="results-container">
+          <div class="result-item">
+            <div class="result-text">Nenhuma análise realizada ainda.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Analytics Page -->
+    <div id="analytics-page" class="hidden">
+      <div class="analytics-section">
+        <h2 class="analytics-title">Análise gráfica:</h2>
+        <div class="analytics-container" id="analytics-container">
+          <div class="chart-container">
+            <canvas id="sentimentChart" width="300" height="300"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    let analysisHistory = [];
+
+    function showPage(page) {
+      // Hide all pages
+      document.getElementById('main-page').classList.toggle('hidden', page !== 'main');
+      document.getElementById('results-page').classList.toggle('hidden', page !== 'results');
+      document.getElementById('analytics-page').classList.toggle('hidden', page !== 'analytics');
+
+      // Update navigation
+      document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+      document.getElementById(`nav-${page}`).classList.add('active');
+
+      if (page === 'results') {
+        displayHistory();
+      } else if (page === 'analytics') {
+        displayAnalytics();
+      }
+    }
+
+    async function analyzeSentiment() {
+      const text = document.getElementById('commentText').value.trim();
+      
+      if (!text) {
+        alert('Por favor, digite um texto para analisar.');
+        return;
+      }
+
+      // Show loading state
+      const btn = document.getElementById('analyzeBtn');
+      btn.disabled = true;
+      btn.classList.add('loading');
+      document.getElementById('btn-text').textContent = 'Analisando...';
+
+      try {
+        console.log('Enviando texto:', text);
+        
+        const response = await fetch('/api/predict', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ text: text })
+        });
+
+        console.log('Resposta HTTP status:', response.status);
+        
+        if (!response.ok) {
+          throw new Error('Erro HTTP: ' + response.status);
+        }
+
+        const result = await response.json();
+        console.log('Resultado recebido:', result);
+
+        if (result.error) {
+          alert('Erro: ' + result.error);
+          return;
+        }
+
+        if (!result.sentiment || !result.sentiment_key) {
+          alert('Resposta inválida do servidor');
+          console.error('Resposta inválida:', result);
+          return;
+        }
+
+        // Add to history and automatically show results
+        analysisHistory.unshift(result);
+        console.log('Histórico atualizado:', analysisHistory);
+        
+        // Clear input
+        document.getElementById('commentText').value = '';
+        
+        // Show results page
+        showPage('results');
+        
+      } catch (error) {
+        console.error('Erro completo:', error);
+        alert('Erro ao conectar com o servidor: ' + error.message);
+      } finally {
+        // Reset button state
+        btn.disabled = false;
+        btn.classList.remove('loading');
+        document.getElementById('btn-text').textContent = 'Analisar';
+      }
+    }
+
+    function displayHistory() {
+      const container = document.getElementById('results-container');
+      console.log('Exibindo histórico, total de análises:', analysisHistory.length);
+      
+      if (!container) {
+        console.error('Container de resultados não encontrado');
+        return;
+      }
+      
+      if (analysisHistory.length === 0) {
+        container.innerHTML = `
+          <div class="result-item">
+            <div class="result-text">Nenhuma análise realizada ainda.</div>
+          </div>
+        `;
+        return;
+      }
+
+      let html = '';
+      analysisHistory.forEach((analysis, index) => {
+        console.log(`Processando análise ${index}:`, analysis);
+        
+        // Validar dados da análise
+        const text = analysis.text || 'Texto não disponível';
+        const sentiment = analysis.sentiment || 'Sentimento não identificado';
+        const sentimentKey = analysis.sentiment_key || 'surpresa';
+        
+        html += `
+          <div class="result-item">
+            <div class="result-text">"${text}"</div>
+            <div class="sentiment-pill sentiment-${sentimentKey}">
+              ${sentiment}
+            </div>
+          </div>
+        `;
+      });
+      
+      console.log('HTML gerado:', html);
+      container.innerHTML = html;
+      
+      // Forçar atualização visual
+      setTimeout(() => {
+        const resultsSection = document.querySelector('.results-section');
+        if (resultsSection) {
+          resultsSection.style.display = 'block';
+        }
+      }, 100);
+    }
+
+    function displayAnalytics() {
+      const container = document.getElementById('analytics-container');
+      
+      if (analysisHistory.length === 0) {
+        container.innerHTML = `
+          <div style="text-align: center; color: #9ca3af;">
+            Realize algumas análises para ver as estatísticas.
+          </div>
+        `;
+        return;
+      }
+
+      // Count sentiments
+      const sentimentCounts = {};
+      analysisHistory.forEach(analysis => {
+        const key = analysis.sentiment;
+        sentimentCounts[key] = (sentimentCounts[key] || 0) + 1;
+      });
+
+      // Create chart
+      setTimeout(() => {
+        createSentimentChart(sentimentCounts);
+      }, 100);
+    }
+
+    function createSentimentChart(sentimentCounts) {
+      const canvas = document.getElementById('sentimentChart');
+      if (!canvas) return;
+
+      // Clear previous chart
+      const ctx = canvas.getContext('2d');
+      
+      // Destroy existing chart if it exists
+      if (window.currentChart) {
+        window.currentChart.destroy();
+      }
+
+      const total = Object.values(sentimentCounts).reduce((a, b) => a + b, 0);
+      
+      const chartData = {
+        labels: Object.keys(sentimentCounts),
+        datasets: [{
+          data: Object.values(sentimentCounts),
+          backgroundColor: [
+            '#8B5CF6', // Tristeza - roxo
+            '#FCD34D', // Alegria - amarelo
+            '#EF4444', // Raiva - vermelho
+            '#10B981'  // Surpresa - verde
+          ],
+          borderWidth: 0
+        }]
+      };
+
+      window.currentChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: chartData,
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          plugins: {
+            legend: {
+              display: true,
+              position: 'right',
+              labels: {
+                usePointStyle: true,
+                padding: 20,
+                font: {
+                  size: 12
+                },
+                generateLabels: function(chart) {
+                  const data = chart.data;
+                  if (data.labels.length && data.datasets.length) {
+                    return data.labels.map((label, i) => {
+                      const value = data.datasets[0].data[i];
+                      const percentage = ((value / total) * 100).toFixed(1);
+                      return {
+                        text: `${label} ${percentage}%`,
+                        fillStyle: data.datasets[0].backgroundColor[i],
+                        strokeStyle: data.datasets[0].backgroundColor[i],
+                        lineWidth: 0,
+                        pointStyle: 'circle'
+                      };
+                    });
+                  }
+                  return [];
+                }
+              }
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  const value = context.parsed;
+                  const percentage = ((value / total) * 100).toFixed(1);
+                  return `${context.label}: ${value} (${percentage}%)`;
+                }
+              }
+            }
+          },
+          cutout: '60%'
+        }
+      });
+    }
+
+    // Handle Enter key in input
+    document.getElementById('commentText').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        analyzeSentiment();
+      }
+    });
+  </script>
+</body>
+</html>

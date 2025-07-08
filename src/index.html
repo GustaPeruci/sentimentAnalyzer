@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <title>Zonalyze - Análise de Sentimentos</title>
+  <base href="/">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Zonalyze - Análise de sentimentos de comentários usando inteligência artificial">
+  <meta name="keywords" content="sentiment analysis, análise de sentimentos, AI, inteligência artificial">
+  <link rel="icon" type="image/x-icon" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTYsMTYpIj4KPGA+YXRoIGQ9Ik0gMCwwIEwgMCwtMTIgQSAxMiwxMiAwIDAsMSA4LjQ4LC04LjQ4IFoiIGZpbGw9IiM4RTQ0QUQiPjwvcGF0aD4KPHA+YXRoIGQ9Ik0gMCwwIEwgOC40OCwtOC40OCBBIDI4LDEyIDAgMCwxIDEyLDAgWiIgZmlsbD0iI0YxQzQwRiI+PC9wYXRoPgo8cGF0aCBkPSJNIDAsMCBMIDEyLDAgQSAxMiwxMiAwIDAsMSA4LjQ4LDguNDggWiIgZmlsbD0iI0U3NEMzQyI+PC9wYXRoPgo8cGF0aCBkPSJNIDAsMCBMIDguNDgsOC40OCBBIDI4LDEyIDAgMCwxIDAsLTEyIFoiIGZpbGw9IiMyRUNDNzEiPjwvcGF0aD4KPC9nPgo8L3N2Zz4K">
+  
+  <!-- Font Awesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  
+  <!-- Bootstrap CSS for styling -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  
+  <!-- Chart.js for visualizations -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background-color: #f8f9fa;
+      line-height: 1.6;
+    }
+    
+    /* Loading spinner for initial app load */
+    .loading-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      z-index: 9999;
+    }
+    
+    .loading-spinner {
+      width: 50px;
+      height: 50px;
+      border: 5px solid rgba(52, 152, 219, 0.1);
+      border-top: 5px solid #3498db;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 20px;
+    }
+    
+    .loading-text {
+      color: #2c3e50;
+      font-size: 1.1rem;
+      font-weight: 500;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    /* Hide loading container once Angular is loaded */
+    app-root:not(:empty) + .loading-container {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <app-root></app-root>
+  
+  <!-- Loading fallback -->
+  <div class="loading-container">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">Carregando Zonalyze...</div>
+  </div>
+  
+  <!-- Bootstrap JS (optional, for interactive components) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

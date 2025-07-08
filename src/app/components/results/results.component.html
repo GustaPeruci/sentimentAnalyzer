@@ -1,0 +1,112 @@
+<div class="results-container">
+  <div class="header">
+    <button (click)="navigateToHome()" class="back-button">
+      <i class="fas fa-arrow-left"></i>
+      Voltar
+    </button>
+    <h1 class="page-title">Resultado:</h1>
+    <div class="header-actions">
+      <button (click)="refreshHistory()" class="action-button" [disabled]="isLoading">
+        <i class="fas fa-sync-alt" [class.spinning]="isLoading"></i>
+        Atualizar
+      </button>
+      <button (click)="clearHistory()" class="action-button danger" [disabled]="isLoading">
+        <i class="fas fa-trash"></i>
+        Limpar
+      </button>
+    </div>
+  </div>
+
+  <div class="content-wrapper">
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="loading-state">
+      <div class="spinner-large"></div>
+      <p>Carregando histórico de análises...</p>
+    </div>
+
+    <!-- Error State -->
+    <div *ngIf="errorMessage && !isLoading" class="error-state">
+      <i class="fas fa-exclamation-triangle"></i>
+      <p>{{ errorMessage }}</p>
+      <button (click)="loadAnalysisHistory()" class="retry-button">Tentar Novamente</button>
+    </div>
+
+    <!-- Results Content -->
+    <div *ngIf="!isLoading && !errorMessage" class="results-content">
+      <!-- Empty State -->
+      <div *ngIf="analysisHistory.length === 0" class="empty-state">
+        <i class="fas fa-comment-slash"></i>
+        <h3>Nenhuma análise encontrada</h3>
+        <p>Vá para a página inicial e analise alguns comentários para ver os resultados aqui.</p>
+        <button (click)="navigateToHome()" class="primary-button">
+          <i class="fas fa-plus"></i>
+          Analisar Comentário
+        </button>
+      </div>
+
+      <!-- Analysis Results -->
+      <div *ngIf="analysisHistory.length > 0" class="analysis-grid">
+        <div 
+          *ngFor="let analysis of analysisHistory; let i = index" 
+          class="analysis-item"
+          [attr.data-sentiment]="analysis.sentiment_key">
+          
+          <div class="analysis-header">
+            <span class="analysis-index">#{{ analysisHistory.length - i }}</span>
+            <div class="sentiment-confidence">
+              {{ formatConfidence(analysis.confidence) }}% confiança
+            </div>
+          </div>
+
+          <div class="analysis-text">
+            "{{ analysis.text }}"
+          </div>
+
+          <div class="sentiment-result">
+            <div class="sentiment-bar-container">
+              <div 
+                class="sentiment-bar"
+                [style.background-color]="getSentimentColor(analysis.sentiment)"
+                [style.width]="getConfidenceWidth(analysis.confidence)">
+                <span class="sentiment-label">
+                  {{ getSentimentDisplayName(analysis.sentiment) }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Detailed Probabilities (Optional) -->
+          <div class="probabilities-section" *ngIf="analysis.probabilities">
+            <div class="probability-bars">
+              <div 
+                *ngFor="let prob of objectEntries(analysis.probabilities)" 
+                class="probability-item">
+                <div class="prob-label">{{ getSentimentDisplayName(prob.key) }}</div>
+                <div class="prob-bar-container">
+                  <div 
+                    class="prob-bar"
+                    [style.background-color]="getSentimentColor(getSentimentDisplayName(prob.key))"
+                    [style.width]="(prob.value * 100) + '%'">
+                  </div>
+                  <span class="prob-value">{{ (prob.value * 100).toFixed(1) }}%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation Footer -->
+  <div class="footer-nav">
+    <button (click)="navigateToHome()" class="nav-footer-button">
+      <i class="fas fa-home"></i>
+      Início
+    </button>
+    <button (click)="navigateToAnalytics()" class="nav-footer-button">
+      <i class="fas fa-chart-pie"></i>
+      Análise Gráfica
+    </button>
+  </div>
+</div>

@@ -1,0 +1,991 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <title>Zonalyze - Análise de Sentimentos</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+  <!-- Chart.js for visualizations -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 60px 20px;
+    }
+
+    .main-container {
+      max-width: 600px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .logo-section {
+      margin-bottom: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
+    }
+
+    .logo-chart {
+      width: 60px;
+      height: 60px;
+      position: relative;
+    }
+
+    .pie-chart {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: conic-gradient(
+        #8B5CF6 0deg 164deg,    /* Tristeza - roxo */
+        #FCD34D 164deg 229deg,  /* Alegria - amarelo */
+        #EF4444 229deg 262deg,  /* Raiva - vermelho */
+        #10B981 262deg 360deg   /* Surpresa - verde */
+      );
+    }
+
+    .logo-text {
+      font-size: 48px;
+      font-weight: 300;
+      color: #000000;
+      letter-spacing: -1px;
+    }
+
+    .input-section {
+      margin-bottom: 40px;
+    }
+
+    .comment-input {
+      width: 100%;
+      max-width: 500px;
+      padding: 16px 20px;
+      border: 2px solid #e5e7eb;
+      border-radius: 50px;
+      font-size: 16px;
+      background: #ffffff;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .comment-input:focus {
+      border-color: #3b82f6;
+    }
+
+    .comment-input::placeholder {
+      color: #9ca3af;
+    }
+
+    .analyze-btn {
+      background: #3b82f6;
+      color: white;
+      border: none;
+      border-radius: 50px;
+      padding: 12px 32px;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      margin-top: 20px;
+      transition: background-color 0.2s;
+    }
+
+    .analyze-btn:hover {
+      background: #2563eb;
+    }
+
+    .analyze-btn:disabled {
+      background: #9ca3af;
+      cursor: not-allowed;
+    }
+
+    .results-section {
+      margin-top: 60px;
+      width: 100%;
+    }
+
+    .results-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #000000;
+      margin-bottom: 30px;
+      text-align: left;
+    }
+
+    .results-container {
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 24px;
+      background: #ffffff;
+    }
+
+    .result-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid #f3f4f6;
+    }
+
+    .result-item:last-child {
+      border-bottom: none;
+    }
+
+    .result-text {
+      font-size: 14px;
+      color: #374151;
+      text-align: left;
+      flex-grow: 1;
+      max-width: 60%;
+    }
+
+    .sentiment-pill {
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+      color: white;
+      min-width: 80px;
+      text-align: center;
+    }
+
+    .sentiment-tristeza { background-color: #8B5CF6; }
+    .sentiment-alegria { background-color: #FCD34D; color: #000; }
+    .sentiment-raiva { background-color: #EF4444; }
+    .sentiment-surpresa { background-color: #10B981; }
+
+    .nav-section {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      display: flex;
+      gap: 10px;
+    }
+
+    .nav-btn {
+      background: #f3f4f6;
+      border: none;
+      border-radius: 20px;
+      padding: 8px 16px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .nav-btn.active {
+      background: #3b82f6;
+      color: white;
+    }
+
+    .nav-btn:hover {
+      background: #e5e7eb;
+    }
+
+    .nav-btn.active:hover {
+      background: #2563eb;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .analytics-container {
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 32px;
+      background: #ffffff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 400px;
+    }
+
+    .chart-container {
+      position: relative;
+      width: 300px;
+      height: 300px;
+    }
+
+    /* History Page Styles */
+    .history-container {
+      width: 100%;
+    }
+
+    .history-stats {
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 30px;
+      padding: 20px;
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      background: #f9fafb;
+    }
+
+    .stat-item {
+      text-align: center;
+    }
+
+    .stat-number {
+      display: block;
+      font-size: 32px;
+      font-weight: 700;
+      color: #3b82f6;
+    }
+
+    .stat-label {
+      font-size: 14px;
+      color: #6b7280;
+      font-weight: 500;
+    }
+
+    .history-actions {
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    .action-btn {
+      background: #3b82f6;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 20px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      margin: 0 10px;
+      transition: background-color 0.2s;
+    }
+
+    .action-btn:hover {
+      background: #2563eb;
+    }
+
+    .action-btn.danger {
+      background: #ef4444;
+    }
+
+    .action-btn.danger:hover {
+      background: #dc2626;
+    }
+
+    /* Dashboard Page Styles */
+    .dashboard-container {
+      width: 100%;
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-gap: 20px;
+      margin-top: 20px;
+    }
+
+    .dashboard-card {
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 20px;
+      background: #ffffff;
+    }
+
+    .dashboard-card h3 {
+      margin: 0 0 15px 0;
+      font-size: 18px;
+      font-weight: 600;
+      color: #374151;
+    }
+
+    .sentiment-breakdown {
+      grid-column: span 2;
+    }
+
+    .sentiment-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+
+    .sentiment-stat {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px;
+      border-radius: 8px;
+      background: #f9fafb;
+    }
+
+    .sentiment-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+
+    .sentiment-dot.tristeza { background-color: #8B5CF6; }
+    .sentiment-dot.alegria { background-color: #FCD34D; }
+    .sentiment-dot.raiva { background-color: #EF4444; }
+    .sentiment-dot.surpresa { background-color: #10B981; }
+
+    .sentiment-name {
+      font-weight: 500;
+      color: #374151;
+      flex-grow: 1;
+    }
+
+    .sentiment-count {
+      font-weight: 700;
+      color: #3b82f6;
+      margin-right: 5px;
+    }
+
+    .sentiment-percent {
+      font-size: 12px;
+      color: #6b7280;
+    }
+
+    .recent-activity {
+      grid-column: span 2;
+    }
+
+    .recent-list {
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .recent-item {
+      padding: 8px 0;
+      border-bottom: 1px solid #f3f4f6;
+      font-size: 14px;
+      color: #6b7280;
+    }
+
+    .recent-item:last-child {
+      border-bottom: none;
+    }
+
+    .recent-item.sentiment-item {
+      display: flex;
+      justify-content: space-between;
+      color: #374151;
+    }
+
+    @media (max-width: 768px) {
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .sentiment-breakdown,
+      .recent-activity {
+        grid-column: span 1;
+      }
+      
+      .sentiment-stats {
+        grid-template-columns: 1fr;
+      }
+      
+      .history-stats {
+        flex-direction: column;
+        gap: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <div class="nav-section">
+    <button class="nav-btn active" onclick="showPage('main')" id="nav-main">Principal</button>
+    <button class="nav-btn" onclick="showPage('results')" id="nav-results">Resultados</button>
+    <button class="nav-btn" onclick="showPage('history')" id="nav-history">Histórico</button>
+    <button class="nav-btn" onclick="showPage('dashboard')" id="nav-dashboard">Dashboard</button>
+  </div>
+
+  <!-- Main Container -->
+  <div class="main-container">
+    <!-- Main Page -->
+    <div id="main-page">
+      <div class="logo-section">
+        <div class="logo-chart">
+          <div class="pie-chart"></div>
+        </div>
+        <div class="logo-text">Zonalyze</div>
+      </div>
+
+      <div class="input-section">
+        <input 
+          type="text" 
+          id="commentText" 
+          class="comment-input" 
+          placeholder="Coloque seu comentário aqui..."
+        />
+        <br>
+        <button class="analyze-btn" onclick="analyzeSentiment()" id="analyzeBtn">
+          <span id="btn-text">Analisar</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Results Page -->
+    <div id="results-page" class="hidden">
+      <div class="results-section">
+        <h2 class="results-title">Resultado:</h2>
+        <div class="results-container" id="results-container">
+          <div class="result-item">
+            <div class="result-text">Nenhuma análise realizada ainda.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- History Page -->
+    <div id="history-page" class="hidden">
+      <div class="results-section">
+        <h2 class="results-title">Histórico de Análises:</h2>
+        <div class="history-container">
+          <div class="history-stats">
+            <div class="stat-item">
+              <span class="stat-number" id="total-analyses">0</span>
+              <span class="stat-label">Total de Análises</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-number" id="today-analyses">0</span>
+              <span class="stat-label">Hoje</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-number" id="dominant-sentiment">-</span>
+              <span class="stat-label">Sentimento Dominante</span>
+            </div>
+          </div>
+          <div class="results-container" id="history-container">
+            <div class="result-item">
+              <div class="result-text">Nenhuma análise no histórico.</div>
+            </div>
+          </div>
+          <div class="history-actions">
+            <button class="action-btn danger" onclick="clearHistory()">Limpar Histórico</button>
+            <button class="action-btn" onclick="exportHistory()">Exportar CSV</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dashboard Page -->
+    <div id="dashboard-page" class="hidden">
+      <div class="results-section">
+        <h2 class="results-title">Dashboard de Sentimentos:</h2>
+        <div class="dashboard-container">
+          <div class="dashboard-grid">
+            <div class="dashboard-card">
+              <h3>Distribuição de Sentimentos</h3>
+              <div class="chart-container">
+                <canvas id="dashboardPieChart" width="250" height="250"></canvas>
+              </div>
+            </div>
+            <div class="dashboard-card">
+              <h3>Tendência Temporal</h3>
+              <div class="chart-container">
+                <canvas id="trendChart" width="400" height="200"></canvas>
+              </div>
+            </div>
+            <div class="dashboard-card sentiment-breakdown">
+              <h3>Análise Detalhada</h3>
+              <div class="sentiment-stats" id="sentiment-breakdown">
+                <div class="sentiment-stat">
+                  <div class="sentiment-dot tristeza"></div>
+                  <span class="sentiment-name">Tristeza</span>
+                  <span class="sentiment-count">0</span>
+                  <span class="sentiment-percent">0%</span>
+                </div>
+                <div class="sentiment-stat">
+                  <div class="sentiment-dot alegria"></div>
+                  <span class="sentiment-name">Alegria</span>
+                  <span class="sentiment-count">0</span>
+                  <span class="sentiment-percent">0%</span>
+                </div>
+                <div class="sentiment-stat">
+                  <div class="sentiment-dot raiva"></div>
+                  <span class="sentiment-name">Raiva</span>
+                  <span class="sentiment-count">0</span>
+                  <span class="sentiment-percent">0%</span>
+                </div>
+                <div class="sentiment-stat">
+                  <div class="sentiment-dot surpresa"></div>
+                  <span class="sentiment-name">Surpresa</span>
+                  <span class="sentiment-count">0</span>
+                  <span class="sentiment-percent">0%</span>
+                </div>
+              </div>
+            </div>
+            <div class="dashboard-card recent-activity">
+              <h3>Atividade Recente</h3>
+              <div class="recent-list" id="recent-activity">
+                <div class="recent-item">Nenhuma atividade recente</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let analysisHistory = [];
+
+    function showPage(page) {
+      // Hide all pages
+      document.getElementById('main-page').classList.toggle('hidden', page !== 'main');
+      document.getElementById('results-page').classList.toggle('hidden', page !== 'results');
+      document.getElementById('history-page').classList.toggle('hidden', page !== 'history');
+      document.getElementById('dashboard-page').classList.toggle('hidden', page !== 'dashboard');
+
+      // Update navigation
+      document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+      document.getElementById('nav-' + page).classList.add('active');
+
+      if (page === 'results') {
+        displayHistory();
+      } else if (page === 'history') {
+        displayHistoryPage();
+      } else if (page === 'dashboard') {
+        displayDashboard();
+      }
+    }
+
+    function analyzeSentiment() {
+      const text = document.getElementById('commentText').value.trim();
+      
+      if (!text) {
+        alert('Por favor, digite um texto para analisar.');
+        return;
+      }
+
+      // Show loading state
+      const btn = document.getElementById('analyzeBtn');
+      btn.disabled = true;
+      document.getElementById('btn-text').textContent = 'Analisando...';
+
+      // Make API call
+      fetch('/api/predict', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text: text })
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Erro na resposta: ' + response.status);
+        }
+        return response.json();
+      })
+      .then(result => {
+        if (result.error) {
+          alert('Erro: ' + result.error);
+          return;
+        }
+
+        // Add timestamp to result
+        result.timestamp = new Date().toISOString();
+        
+        // Add to history
+        analysisHistory.unshift(result);
+        
+        // Clear input
+        document.getElementById('commentText').value = '';
+        
+        // Show results
+        showPage('results');
+      })
+      .catch(error => {
+        console.error('Erro:', error);
+        alert('Erro ao conectar com o servidor. Tente novamente.');
+      })
+      .finally(() => {
+        // Reset button
+        btn.disabled = false;
+        document.getElementById('btn-text').textContent = 'Analisar';
+      });
+    }
+
+    function displayHistory() {
+      const container = document.getElementById('results-container');
+      
+      if (analysisHistory.length === 0) {
+        container.innerHTML = '<div class="result-item"><div class="result-text">Nenhuma análise realizada ainda.</div></div>';
+        return;
+      }
+
+      let html = '';
+      analysisHistory.forEach(analysis => {
+        html += `
+          <div class="result-item">
+            <div class="result-text">"${analysis.text}"</div>
+            <div class="sentiment-pill sentiment-${analysis.sentiment_key}">
+              ${analysis.sentiment}
+            </div>
+          </div>
+        `;
+      });
+      container.innerHTML = html;
+    }
+
+    function displayAnalytics() {
+      const container = document.getElementById('analytics-container');
+      
+      if (analysisHistory.length === 0) {
+        container.innerHTML = '<div style="text-align: center; color: #9ca3af;">Realize algumas análises para ver as estatísticas.</div>';
+        return;
+      }
+
+      // Count sentiments
+      const sentimentCounts = {};
+      analysisHistory.forEach(analysis => {
+        const key = analysis.sentiment;
+        sentimentCounts[key] = (sentimentCounts[key] || 0) + 1;
+      });
+
+      // Create chart after delay
+      setTimeout(() => {
+        createSentimentChart(sentimentCounts);
+      }, 100);
+    }
+
+    function createSentimentChart(sentimentCounts) {
+      const canvas = document.getElementById('sentimentChart');
+      if (!canvas) return;
+
+      const ctx = canvas.getContext('2d');
+      
+      // Destroy existing chart
+      if (window.currentChart) {
+        window.currentChart.destroy();
+      }
+
+      const total = Object.values(sentimentCounts).reduce((a, b) => a + b, 0);
+      
+      window.currentChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: Object.keys(sentimentCounts),
+          datasets: [{
+            data: Object.values(sentimentCounts),
+            backgroundColor: ['#8B5CF6', '#FCD34D', '#EF4444', '#10B981'],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          plugins: {
+            legend: {
+              display: true,
+              position: 'right',
+              labels: {
+                usePointStyle: true,
+                padding: 20,
+                font: { size: 12 },
+                generateLabels: function(chart) {
+                  const data = chart.data;
+                  if (data.labels.length && data.datasets.length) {
+                    return data.labels.map((label, i) => {
+                      const value = data.datasets[0].data[i];
+                      const percentage = ((value / total) * 100).toFixed(1);
+                      return {
+                        text: `${label} ${percentage}%`,
+                        fillStyle: data.datasets[0].backgroundColor[i],
+                        strokeStyle: data.datasets[0].backgroundColor[i],
+                        lineWidth: 0,
+                        pointStyle: 'circle'
+                      };
+                    });
+                  }
+                  return [];
+                }
+              }
+            }
+          },
+          cutout: '60%'
+        }
+      });
+    }
+
+    function displayHistoryPage() {
+      const container = document.getElementById('history-container');
+      
+      // Update statistics
+      updateHistoryStats();
+      
+      if (analysisHistory.length === 0) {
+        container.innerHTML = '<div class="result-item"><div class="result-text">Nenhuma análise no histórico.</div></div>';
+        return;
+      }
+
+      // Display all analyses with timestamps
+      let html = '';
+      analysisHistory.forEach((analysis, index) => {
+        const timestamp = analysis.timestamp || new Date().toLocaleString('pt-BR');
+        html += `
+          <div class="result-item">
+            <div class="result-text">
+              <div>"${analysis.text}"</div>
+              <div style="font-size: 12px; color: #6b7280; margin-top: 4px;">${timestamp}</div>
+            </div>
+            <div class="sentiment-pill sentiment-${analysis.sentiment_key}">
+              ${analysis.sentiment}
+            </div>
+          </div>
+        `;
+      });
+      container.innerHTML = html;
+    }
+
+    function updateHistoryStats() {
+      const total = analysisHistory.length;
+      document.getElementById('total-analyses').textContent = total;
+      
+      // Calculate today's analyses
+      const today = new Date().toDateString();
+      const todayCount = analysisHistory.filter(analysis => {
+        const analysisDate = analysis.timestamp ? new Date(analysis.timestamp).toDateString() : today;
+        return analysisDate === today;
+      }).length;
+      document.getElementById('today-analyses').textContent = todayCount;
+      
+      // Find dominant sentiment
+      if (total > 0) {
+        const sentimentCounts = {};
+        analysisHistory.forEach(analysis => {
+          const sentiment = analysis.sentiment;
+          sentimentCounts[sentiment] = (sentimentCounts[sentiment] || 0) + 1;
+        });
+        
+        const dominantSentiment = Object.keys(sentimentCounts).reduce((a, b) => 
+          sentimentCounts[a] > sentimentCounts[b] ? a : b
+        );
+        document.getElementById('dominant-sentiment').textContent = dominantSentiment;
+      } else {
+        document.getElementById('dominant-sentiment').textContent = '-';
+      }
+    }
+
+    function displayDashboard() {
+      if (analysisHistory.length === 0) {
+        // Show empty state
+        updateSentimentBreakdown({});
+        updateRecentActivity([]);
+        return;
+      }
+
+      // Calculate sentiment distribution
+      const sentimentCounts = {};
+      analysisHistory.forEach(analysis => {
+        const key = analysis.sentiment;
+        sentimentCounts[key] = (sentimentCounts[key] || 0) + 1;
+      });
+
+      // Update dashboard components
+      updateSentimentBreakdown(sentimentCounts);
+      updateRecentActivity(analysisHistory.slice(0, 10));
+      
+      // Create charts after delay
+      setTimeout(() => {
+        createDashboardPieChart(sentimentCounts);
+        createTrendChart();
+      }, 100);
+    }
+
+    function updateSentimentBreakdown(sentimentCounts) {
+      const total = Object.values(sentimentCounts).reduce((a, b) => a + b, 0);
+      const sentiments = ['Tristeza', 'Alegria', 'Raiva', 'Surpresa'];
+      
+      sentiments.forEach(sentiment => {
+        const count = sentimentCounts[sentiment] || 0;
+        const percentage = total > 0 ? ((count / total) * 100).toFixed(1) : 0;
+        
+        const sentimentKey = sentiment.toLowerCase();
+        const statElement = document.querySelector(`.sentiment-stat .sentiment-dot.${sentimentKey}`).closest('.sentiment-stat');
+        statElement.querySelector('.sentiment-count').textContent = count;
+        statElement.querySelector('.sentiment-percent').textContent = `${percentage}%`;
+      });
+    }
+
+    function updateRecentActivity(recentAnalyses) {
+      const container = document.getElementById('recent-activity');
+      
+      if (recentAnalyses.length === 0) {
+        container.innerHTML = '<div class="recent-item">Nenhuma atividade recente</div>';
+        return;
+      }
+
+      let html = '';
+      recentAnalyses.forEach(analysis => {
+        const timestamp = analysis.timestamp || 'Agora';
+        html += `
+          <div class="recent-item sentiment-item">
+            <span>"${analysis.text.substring(0, 40)}${analysis.text.length > 40 ? '...' : ''}"</span>
+            <span class="sentiment-pill sentiment-${analysis.sentiment_key}" style="font-size: 10px; padding: 2px 8px;">
+              ${analysis.sentiment}
+            </span>
+          </div>
+        `;
+      });
+      container.innerHTML = html;
+    }
+
+    function createDashboardPieChart(sentimentCounts) {
+      const canvas = document.getElementById('dashboardPieChart');
+      if (!canvas) return;
+
+      const ctx = canvas.getContext('2d');
+      
+      // Destroy existing chart
+      if (window.dashboardChart) {
+        window.dashboardChart.destroy();
+      }
+
+      const total = Object.values(sentimentCounts).reduce((a, b) => a + b, 0);
+      
+      if (total === 0) {
+        ctx.fillStyle = '#e5e7eb';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#6b7280';
+        ctx.font = '14px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('Nenhum dado', canvas.width / 2, canvas.height / 2);
+        return;
+      }
+      
+      window.dashboardChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: Object.keys(sentimentCounts),
+          datasets: [{
+            data: Object.values(sentimentCounts),
+            backgroundColor: ['#8B5CF6', '#FCD34D', '#EF4444', '#10B981'],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          plugins: {
+            legend: {
+              display: false
+            }
+          },
+          cutout: '60%'
+        }
+      });
+    }
+
+    function createTrendChart() {
+      const canvas = document.getElementById('trendChart');
+      if (!canvas) return;
+
+      const ctx = canvas.getContext('2d');
+      
+      // Destroy existing chart
+      if (window.trendChart && typeof window.trendChart.destroy === 'function') {
+        window.trendChart.destroy();
+      }
+
+      // Simple trend data (last 7 days)
+      const days = [];
+      const data = [];
+      
+      for (let i = 6; i >= 0; i--) {
+        const date = new Date();
+        date.setDate(date.getDate() - i);
+        days.push(date.toLocaleDateString('pt-BR', { weekday: 'short' }));
+        
+        // Count analyses for this day
+        const dayCount = analysisHistory.filter(analysis => {
+          if (!analysis.timestamp) return i === 0; // Today if no timestamp
+          const analysisDate = new Date(analysis.timestamp).toDateString();
+          return analysisDate === date.toDateString();
+        }).length;
+        
+        data.push(dayCount);
+      }
+      
+      window.trendChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: days,
+          datasets: [{
+            label: 'Análises',
+            data: data,
+            borderColor: '#3b82f6',
+            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+            borderWidth: 2,
+            fill: true,
+            tension: 0.4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                stepSize: 1
+              }
+            }
+          }
+        }
+      });
+    }
+
+    function clearHistory() {
+      if (confirm('Tem certeza que deseja limpar todo o histórico?')) {
+        analysisHistory = [];
+        showPage('history'); // Refresh the page
+        alert('Histórico limpo com sucesso!');
+      }
+    }
+
+    function exportHistory() {
+      if (analysisHistory.length === 0) {
+        alert('Não há dados para exportar.');
+        return;
+      }
+
+      let csv = 'Texto,Sentimento,Confiança,Data\n';
+      analysisHistory.forEach(analysis => {
+        const timestamp = analysis.timestamp || new Date().toISOString();
+        csv += `"${analysis.text}","${analysis.sentiment}","${analysis.confidence}","${timestamp}"\n`;
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'historico_sentimentos.csv';
+      a.click();
+      window.URL.revokeObjectURL(url);
+    }
+
+    // Handle Enter key
+    document.getElementById('commentText').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        analyzeSentiment();
+      }
+    });
+  </script>
+</body>
+</html>
